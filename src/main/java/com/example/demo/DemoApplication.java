@@ -4,6 +4,7 @@ import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 //@SpringBootApplication
 public class DemoApplication {
@@ -24,21 +25,21 @@ public class DemoApplication {
 
 		HttpEntity<User> requestEntity = new HttpEntity<>(headers);
 
-		ResponseEntity<List> responseEntity = restTemplate.exchange(baseURL,
+		ResponseEntity<String> responseEntity = restTemplate.exchange(baseURL,
 				HttpMethod.GET,
 				requestEntity,
-				List.class);
+				String.class);
+
+		responseEntity.getHeaders().get("Set-Cookie").stream().forEach(System.out::println);
+
 		HttpStatus statusCode = responseEntity.getStatusCode();
 		System.out.println("Status Code " + statusCode);
 
-		List user = responseEntity.getBody();
+		String user = responseEntity.getBody();
 		System.out.println("responce Entity " + user);
 
 		HttpHeaders responseHeaders = responseEntity.getHeaders();
 		System.out.println("responce Headers " + responseHeaders);
-
-		HttpHeaders hedCook = new HttpHeaders();
-		hedCook.set("Set-Cookie", responseEntity.getHeaders().get("Set-Cookie").stream().limit(1));
 
 
 		User sysUser = new User();
