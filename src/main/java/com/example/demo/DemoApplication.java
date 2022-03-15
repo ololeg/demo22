@@ -3,6 +3,7 @@ package com.example.demo;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.Cookie;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,19 +42,29 @@ public class DemoApplication {
 		HttpHeaders responseHeaders = responseEntity.getHeaders();
 		System.out.println("responce Headers " + responseHeaders);
 
-
 		User sysUser = new User();
 		sysUser.setId(3L);
 		sysUser.setName("James");
 		sysUser.setLastName("Brown");
 		sysUser.setAge((byte) 24);
 
-		requestEntity = new HttpEntity<>(sysUser, headers);
+		RestTemplate rest = new RestTemplate();
+		HttpHeaders httpHeaders = new HttpHeaders();
 
-		ResponseEntity<String> responseEntity1 = restTemplate.exchange(baseURL,
+		List<String> cookies = responseEntity.getHeaders().get("Set-Cookie");
+		httpHeaders.set("Cookie",cookies.stream().collect(Collectors.joining(";")));
+
+
+		requestEntity = new HttpEntity<>(sysUser, httpHeaders);
+
+		ResponseEntity<String> responseEntity1 = rest.exchange(baseURL,
 				HttpMethod.POST,
 				requestEntity,
 				String.class);
+
+//		responseEntity1.getHeaders().get("Set-Cookie").stream().forEach(System.out::println);
+
+
 		HttpStatus statusCode1 = responseEntity1.getStatusCode();
 		System.out.println("Status Code " + statusCode1);
 
@@ -64,26 +75,50 @@ public class DemoApplication {
 		System.out.println("responce Headers " + responseHeaders1);
 
 
-
-//		User upUser = new User();
-//		upUser.setId(3L);
-//		upUser.setName("Thomas");
-//		upUser.setLastName("Shelby");
-//		upUser.setAge((byte) 24);
+		User upUser = new User();
+		upUser.setId(3L);
+		upUser.setName("Thomas");
+		upUser.setLastName("Shelby");
+		upUser.setAge((byte) 24);
 //		requestEntity = new HttpEntity<>(upUser, headers);
 
 //		editUser(requestEntity);
+		RestTemplate rest2 = new RestTemplate();
+		HttpHeaders httpHeader2 = new HttpHeaders(headers);
+
+
+		httpHeader2.set("Cookie",cookies.stream().collect(Collectors.joining(";")));
+
+		requestEntity = new HttpEntity<>(upUser, httpHeader2);
+
+		ResponseEntity<String> responseEntity2 = rest2.exchange(baseURL,
+				HttpMethod.PUT,
+				requestEntity,
+				String.class);
+
+//		responseEntity2.getHeaders().get("Set-Cookie").stream().forEach(System.out::println);
+
+		HttpStatus statusCode2 = responseEntity2.getStatusCode();
+		System.out.println("Status Code " + statusCode2);
+
+		String userEdit = responseEntity2.getBody();
+		System.out.println("responce Entity " + userEdit);
+
+		HttpHeaders responseHeaders2 = responseEntity2.getHeaders();
+		System.out.println("responce Headers " + responseHeaders2);
+
 
 		deliteUser(requestEntity);
 	}
 
 
-
 	private static void editUser(HttpEntity<User> requestEntity) {
+
 		ResponseEntity<String> responseEntity1 = restTemplate.exchange(baseURL,
 				HttpMethod.PUT,
 				requestEntity,
 				String.class);
+
 		HttpStatus statusCode1 = responseEntity1.getStatusCode();
 		System.out.println("Status Code " + statusCode1);
 
